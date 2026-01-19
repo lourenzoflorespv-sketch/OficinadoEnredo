@@ -1,0 +1,275 @@
+/* --- VARIÁVEIS DE TEMA (Paleta de Cores) --- */
+:root {
+    /* MODO ESCURO (Base) */
+    --bg-dark: #0a0e14; /* Preto azulado profundo */
+    --text-dark: #a0a0a0;
+    --gradiente-dark: linear-gradient(135deg, #0a0e14 0%, #151b25 100%);
+
+    /* MODO CLARO (Ativado) */
+    --bg-light: #f4f1ea; /* Cor de Papel Marfim */
+    --text-light: #2d2a26; /* Cinza Carvão */
+    --papel: #ffffff;
+    
+    /* DETALHES (Ouro/Bronze) */
+    --accent: #c4a068; 
+    --accent-hover: #d4af37;
+    
+    /* VIDRO (Glassmorphism) */
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.9);
+    --shadow-nice: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+/* Reset Básico */
+* { box-sizing: border-box; outline: none; }
+
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+    transition: background-color 1.2s ease, color 1s ease;
+}
+
+/* --- ESTADO: ESCURO --- */
+body.theme-dark {
+    background: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+/* Oculta o app no escuro */
+body.theme-dark .interface-app {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+    filter: blur(8px);
+}
+
+#overlay-escuro {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: opacity 1s ease;
+}
+
+.boas-vindas { text-align: center; }
+.titulo-intro {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin: 0;
+}
+.subtitulo-intro { font-weight: 200; opacity: 0.6; }
+
+/* --- ESTADO: CLARO (Luz Acesa) --- */
+body.theme-light {
+    background-color: var(--bg-light);
+    color: var(--text-light);
+}
+
+body.theme-light #overlay-escuro {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.theme-light .interface-app {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+    pointer-events: all;
+}
+
+/* --- O INTERRUPTOR --- */
+.interruptor-container {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    z-index: 999;
+}
+
+.botao-luz {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center; justify-content: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+#icone-luz { font-size: 28px; color: #666; transition: 0.4s; }
+.label-luz { margin-top: 10px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.5; }
+
+/* Estado Ativo do Botão */
+body.theme-light .botao-luz {
+    background: var(--accent);
+    box-shadow: 0 0 30px rgba(196, 160, 104, 0.6);
+    border-color: transparent;
+    transform: scale(1.1);
+}
+body.theme-light #icone-luz { color: white; }
+
+/* --- LAYOUT DO APP --- */
+.interface-app {
+    display: flex;
+    height: 100vh;
+    padding: 30px;
+    gap: 30px;
+    transition: all 1.2s ease;
+}
+
+/* Painéis Laterais */
+.painel-vidro {
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: var(--shadow-nice);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.cabecalho-painel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    color: var(--accent);
+}
+.cabecalho-painel h2 { font-family: 'Cormorant Garamond', serif; margin: 0; font-size: 1.5rem; color: var(--text-light); }
+
+/* Área de Escrita (Papel) */
+.area-escrita {
+    flex: 2;
+    background: var(--papel);
+    border-radius: 8px;
+    box-shadow: var(--shadow-nice);
+    padding: 50px 70px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.toolbar-editor {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #999;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#titulo-obra {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    border: none;
+    width: 100%;
+    margin-bottom: 30px;
+    color: var(--text-light);
+    background: transparent;
+}
+#titulo-obra::placeholder { color: #ccc; font-style: italic; }
+
+#editor-texto {
+    flex: 1;
+    border: none;
+    resize: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    line-height: 1.8;
+    color: #444;
+    background: transparent;
+}
+
+/* UI Elements */
+.scroll-customizado { overflow-y: auto; padding-right: 5px; }
+.scroll-customizado::-webkit-scrollbar { width: 4px; }
+.scroll-customizado::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* Gêneros e Checkboxes */
+.opcao-genero {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+.opcao-genero:hover { background: rgba(0,0,0,0.03); }
+.opcao-genero input { margin-right: 12px; accent-color: var(--accent); transform: scale(1.2); }
+
+/* Botões e IA */
+.assistente-ia {
+    margin-top: auto;
+    background: linear-gradient(135deg, #fff, #f9f9f9);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+.caixa-texto-ia {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 10px 0;
+    font-style: italic;
+    min-height: 40px;
+}
+.btn-premium {
+    width: 100%;
+    padding: 12px;
+    background: var(--text-light);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.btn-premium:hover { background: var(--accent); }
+
+/* Pesquisa */
+.container-busca { display: flex; gap: 5px; margin-bottom: 15px; }
+#input-pesquisa {
+    flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+}
+.btn-icon {
+    background: transparent; border: 1px solid #ddd; border-radius: 6px;
+    cursor: pointer; color: var(--accent); width: 40px;
+}
+.livro-card {
+    background: white; padding: 15px; margin-bottom: 10px;
+    border-radius: 8px; border-left: 3px solid var(--accent);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* REAÇÃO AO FOCO (Ergonomia) */
+.area-escrita:focus-within {
+    transform: scale(1.02);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+.interface-app:has(.area-escrita:focus-within) .painel-vidro {
+    opacity: 0.3; /* Desfoca as laterais para focar no texto */
+}
