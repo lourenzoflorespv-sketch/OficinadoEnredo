@@ -86,9 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos).`;
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': API_KEY // <--- A Chave entra aqui agora!
+                },
                 body: JSON.stringify({ contents: [{ parts: [{ text: promptSistema }] }] })
             });
 
