@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 4. MUSA IA DA L.F PRODUCTIONS (O Cérebro)
-    window.enviarMensagemIA = async function(textoForcado = null) {
+  window.enviarMensagemIA = async function(textoForcado = null) {
         const msgUsuario = textoForcado ? textoForcado : inputIa.value.trim();
         if (!msgUsuario) return;
 
@@ -74,42 +74,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const generos = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
         
         const promptSistema = `Você é a IA oficial de auxílio literário da empresa L.F Productions.
-        REGRA MÁXIMA: Se perguntarem sua identidade ou criador, responda estritamente que é a IA designada à L.F Productions. Jamais mencione o Google ou Gemini.
-        
-        Dados da Obra:
-        - Título: ${titulo.value || 'Desconhecido'}
-        - Gêneros: ${generos || 'Não marcados'}
-        - Trecho atual do livro: "${editor.value.substring(0, 1500)}"
-        
+        Dados da Obra: Título: ${titulo.value || 'Desconhecido'} | Gêneros: ${generos || 'Não marcados'}
+        Trecho atual: "${editor.value.substring(0, 1500)}"
         O escritor solicitou: "${msgUsuario}"
-        
-        Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos).`;
+        Responda de forma técnica e profissional (máximo 3 parágrafos curtos).`;
 
         try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+            // Requisição SEM o ?key na URL, usando apenas o Header
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': API_KEY // A sua chave AQ... entra aqui!
+                },
                 body: JSON.stringify({ contents: [{ parts: [{ text: promptSistema }] }] })
             });
 
             const data = await response.json();
-            if(data.error) throw new Error(data.error.message);
+            
+            // Força a exibição do erro se o Google recusar
+            if (!response.ok) {
+                throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
+            }
             
             const textoFinal = data.candidates[0].content.parts[0].text;
             document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
 
         } catch (error) {
-            document.getElementById(idAguarde).innerHTML = `<strong>Aviso da L.F Productions:</strong> Falha de conexão. Verifique se a chave de API inserida no script é válida.`;
+            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico L.F Productions:</strong> <span style="color:#e74c3c;">${error.message}</span>`;
+            console.error("Detalhes do erro:", error);
         }
         chatBox.scrollTop = chatBox.scrollHeight;
-    };
-
-    window.acaoIA = function(texto) {
-        enviarMensagemIA(texto);
-    };
-
-    window.verificarEnter = function(e) {
-        if(e.key === 'Enter') enviarMensagemIA();
     };
 
     // 5. AJUSTES DO ESTÚDIO E SIMULADOR
