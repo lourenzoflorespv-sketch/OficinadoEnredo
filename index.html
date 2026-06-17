@@ -9,82 +9,91 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Bangers&family=Cinzel:wght@500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Courier+Prime&family=Creepster&family=Dancing+Script:wght@500;700&family=Great+Vibes&family=MedievalSharp&family=Montserrat:wght@200;300;400;500;600;800&family=Orbitron:wght@500;700&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Press+Start+2P&family=Roboto+Mono:wght@300;400&family=Special+Elite&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
 
-    <div id="overlay-escuro">
-        <div class="boas-vindas">
-            <h1 class="titulo-intro">Oficina do Enredo</h1>
-            <p class="subtitulo-intro">"A tela em branco é o início de infinitas possibilidades."</p>
-            <div class="interruptor-container" onclick="alternarEnergia()">
-                <div class="botao-luz">
-                    <span class="material-icons" id="icone-luz">lightbulb</span>
-                </div>
-                <div class="label-luz">Iluminar</div>
-            </div>
-        </div>
+    <div class="fundo-bokeh">
+        <div class="bolha b1"></div>
+        <div class="bolha b2"></div>
     </div>
 
-    <div class="interface-app">
+    <div id="camada-poema">
+        <div class="texto-poema">"A tela em branco não é um vazio, mas o limiar de universos inteiros esperando pelo seu sopro de vida."</div>
+        <div class="autor-poema">- L.F Productions</div>
+    </div>
+
+    <div class="switch-container" onclick="alternarEnergia()">
+        <div class="btn-switch">
+            <span class="material-icons">power_settings_new</span>
+        </div>
+        <div id="aviso-toque">Toque para Iluminar</div>
+    </div>
+
+    <div class="app-interface">
         
-        <aside class="painel-vidro">
-            <div class="cabecalho-painel">
-                <span class="material-icons">auto_awesome</span>
-                <h2>Musa IA</h2>
+        <aside class="painel">
+            <div class="header-painel">
+                <h2>Oficina do Enredo</h2>
+                <span>L.F PRODUCTIONS</span>
             </div>
 
             <div class="tabs-nav">
-                <button class="tab-btn ativo" onclick="mudarAba('tab-generos')">Gêneros</button>
+                <button class="tab-btn ativo" onclick="mudarAba('tab-ia')">Musa IA</button>
+                <button class="tab-btn" onclick="mudarAba('tab-generos')">Gêneros</button>
                 <button class="tab-btn" onclick="mudarAba('tab-pesquisa')">Biblioteca</button>
             </div>
 
-            <div id="tab-generos" class="tab-conteudo visivel scroll-customizado">
-                <div id="lista-generos" class="lista-generos-container">
-                    </div>
+            <div id="tab-ia" class="tab-conteudo visivel">
+                <div id="chat-ia" class="lista-generos-container scroll-customizado" style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="mensagem ia">Olá, escritor! Sou a IA da L.F Productions. Analisarei seu livro e seus gêneros. O que deseja saber?</div>
+                </div>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input type="text" id="input-ia" class="input-pesquisa" placeholder="Peça uma dica de enredo..." style="border-radius: 6px; padding: 10px;">
+                    <button class="btn-search" onclick="enviarMensagemIA()" style="position:relative; right:0; top:0; border-radius:6px;">
+                        <span class="material-icons">send</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="tab-generos" class="tab-conteudo scroll-customizado">
+                <div id="lista-generos" class="lista-generos-container"></div>
             </div>
 
             <div id="tab-pesquisa" class="tab-conteudo scroll-customizado">
-                <div class="container-busca">
-                    <input type="text" id="input-pesquisa" placeholder="Pesquisar referências...">
-                    <button class="btn-icon" onclick="pesquisarLivros()">
+                <div class="search-wrapper">
+                    <input type="text" id="input-pesquisa" class="input-pesquisa" placeholder="Pesquisar referências...">
+                    <button class="btn-search" onclick="pesquisarLivros()">
                         <span class="material-icons">search</span>
                     </button>
                 </div>
                 <div id="resultados-busca"></div>
             </div>
-
-            <div class="assistente-ia">
-                <div id="chat-ia" class="scroll-customizado">
-                    <div class="mensagem ia">Olá! Sou sua Musa IA. Selecione seus gêneros, escreva um pouco e me peça dicas.</div>
-                </div>
-                <div class="input-chat-container">
-                    <input type="text" id="input-ia" placeholder="Peça uma dica ou análise...">
-                    <button class="btn-enviar-ia" onclick="enviarMensagemIA()">
-                        <span class="material-icons">send</span>
-                    </button>
-                </div>
-            </div>
+            
+            <button class="btn-pdf" onclick="baixarPDF()" style="margin-top: 15px;">
+                <span class="material-icons">picture_as_pdf</span> Baixar Manuscrito
+            </button>
         </aside>
 
-        <main class="area-escrita" id="area-pdf">
-            <div class="toolbar-editor" data-html2canvas-ignore="true">
-                <span id="contador-palavras">0 palavras</span>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-top" onclick="mudarFonte()"><span class="material-icons">font_download</span></button>
-                    <button class="btn-top" onclick="baixarPDF()"><span class="material-icons">picture_as_pdf</span> PDF</button>
-                </div>
+        <main class="editor-wrapper">
+            <div class="btn-float pos-acessibilidade" onclick="mudarTemaPapel()">
+                <span class="material-icons">contrast</span>
             </div>
-            
-            <input type="text" id="titulo-obra" placeholder="O Título da sua Obra">
-            <textarea id="editor-texto" placeholder="Era uma noite escura e tempestuosa..." oninput="contarPalavras()"></textarea>
+            <div class="btn-float pos-estudio" onclick="mudarFonte()">
+                <span class="material-icons">font_download</span> Mudar Fonte
+            </div>
+
+            <div id="folha-livro">
+                <div class="watermark-lf">L.F Productions</div>
+                <input type="text" id="titulo-obra" placeholder="O Título da sua Obra">
+                <textarea id="editor-texto" placeholder="Comece a escrever sua obra-prima aqui..."></textarea>
+            </div>
         </main>
-        
     </div>
 
-    <script src="script.js"></script>
+    <script src="script (1).js"></script>
 </body>
 </html>
