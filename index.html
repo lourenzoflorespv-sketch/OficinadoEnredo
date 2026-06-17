@@ -7,10 +7,11 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Courier+Prime&family=Dancing+Script:wght@500;700&family=Montserrat:wght@300;400;600;800&family=Special+Elite&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Courier+Prime&family=Montserrat:wght@200;300;400;500;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
@@ -21,121 +22,100 @@
     </div>
 
     <div id="camada-poema">
-        <div class="bloco-poema">
-            <p class="texto-poema">"As palavras são as únicas coisas que duram para sempre."</p>
-            <span class="autor-poema">— L.F Productions</span>
-        </div>
+        <div class="texto-poema">"A tela em branco não é um vazio, mas o limiar de universos inteiros esperando pelo seu sopro de vida."</div>
+        <div class="autor-poema">- L.F Productions</div>
     </div>
 
-    <div id="container-interruptor" onclick="alternarEnergia()">
-        <div class="aro-luz">
-            <div class="botao-luz">
-                <span class="material-icons">lightbulb</span>
-            </div>
+    <div class="switch-container" id="interruptor" onclick="alternarEnergia()">
+        <div class="btn-switch">
+            <span class="material-icons">power_settings_new</span>
         </div>
-        <p id="label-interruptor">Toque para despertar a escrita</p>
+        <div id="aviso-toque">Toque para Iluminar</div>
     </div>
 
-    <div class="app-container" id="app-main">
+    <div class="interface-app" id="app-main">
         
-        <aside class="sidebar-vidro">
-            <div class="logo-area">
-                <h1>Oficina do Enredo</h1>
-                <p>ESTÚDIO CRIATIVO | L.F PRODUCTIONS</p>
+        <aside class="painel-vidro">
+            <div class="header-painel">
+                <h2>Oficina do Enredo</h2>
+                <span>L.F PRODUCTIONS</span>
             </div>
 
-            <nav class="abas-nav">
-                <button class="aba-btn ativa" onclick="trocarAba('aba-ia')" title="Auxílio Oficina do Enredo"><span class="material-icons">terminal</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-generos')" title="Configurar Gêneros"><span class="material-icons">style</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-biblioteca')" title="Biblioteca de Referências"><span class="material-icons">local_library</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-ajustes')" title="Ajustes do Estúdio"><span class="material-icons">tune</span></button>
-            </nav>
+            <div class="tabs-nav">
+                <button class="tab-btn ativo" onclick="mudarAba('tab-ia')">Musa IA</button>
+                <button class="tab-btn" onclick="mudarAba('tab-generos')">Gêneros</button>
+                <button class="tab-btn" onclick="mudarAba('tab-pesquisa')">Biblioteca</button>
+            </div>
 
-            <div class="conteudo-abas">
-                
-                <div id="aba-ia" class="aba-item visivel">
-                    <div class="ia-acoes-rapidas">
-                        <button onclick="acaoRapidaIA('Analise o enredo do meu texto e sugira um ponto de virada dramática.')">Ponto de Virada</button>
-                        <button onclick="acaoRapidaIA('Verifique a consistência narrativa e o ritmo do trecho escrito.')">Análise de Ritmo</button>
-                        <button onclick="acaoRapidaIA('Desenvolva um antagonista complexo que se oponha a esta narrativa.')">Gerar Oponente</button>
+            <div class="conteudo-wrapper">
+                <div id="tab-ia" class="tab-conteudo visivel">
+                    <div class="acoes-ia">
+                        <button onclick="acaoIA('Analise o trecho escrito e sugira como aumentar a tensão.')">Analisar Tensão</button>
+                        <button onclick="acaoIA('Verifique se há furos no enredo do texto fornecido.')">Revisar Enredo</button>
                     </div>
-                    <div class="chat-container scroll-custom" id="chat-ia">
-                        <div class="msg ia">Sistema Iniciado. Sou o <strong>Auxílio da Oficina do Enredo</strong>, sua ferramenta de análise literária designada à L.F Productions. Como posso otimizar sua narrativa hoje?</div>
+                    <div id="chat-ia" class="scroll-customizado chat-box">
+                        <div class="mensagem ia">Saudações. Sou a Inteligência de Auxílio da <strong>L.F Productions</strong>. Como posso guiar sua escrita hoje?</div>
                     </div>
-                    <div class="input-area-ia">
-                        <input type="text" id="pergunta-ia" placeholder="Solicite assistência ao sistema...">
-                        <button onclick="comunicarIA()"><span class="material-icons">send</span></button>
+                    <div class="chat-input">
+                        <input type="text" id="input-ia" placeholder="Peça uma dica literária..." onkeypress="verificarEnter(event)">
+                        <button onclick="enviarMensagemIA()"><span class="material-icons">send</span></button>
                     </div>
                 </div>
 
-                <div id="aba-generos" class="aba-item scroll-custom">
-                    <p class="instrucao-aba">Selecione as vertentes que compõem a matriz da sua história:</p>
-                    <div id="lista-generos" class="grid-generos">
+                <div id="tab-generos" class="tab-conteudo scroll-customizado">
+                    <p class="dica-aba">Selecione para guiar a IA:</p>
+                    <div id="lista-generos">
                         </div>
                 </div>
 
-                <div id="aba-biblioteca" class="aba-item">
-                    <div class="busca-caixa">
-                        <input type="text" id="busca-livro" placeholder="Pesquisar referências no acervo...">
-                        <button onclick="pesquisaReal()"><span class="material-icons">search</span></button>
+                <div id="tab-pesquisa" class="tab-conteudo scroll-customizado">
+                    <div class="container-busca">
+                        <input type="text" id="input-pesquisa" placeholder="Buscar termos (ex: Vilões)...">
+                        <button class="btn-icon" onclick="pesquisarLivros()"><span class="material-icons">search</span></button>
                     </div>
-                    <div id="resultados-biblioteca" class="scroll-custom">
-                        <div class="msg ia" style="opacity: 0.7;">Consulte termos chaves da literatura (ex: "Vilões", "Jornada do Herói", "Ganchos").</div>
-                    </div>
-                </div>
-
-                <div id="aba-ajustes" class="aba-item scroll-custom">
-                    <div class="grupo-ajuste">
-                        <label>Simulador de Dispositivo</label>
-                        <select id="select-view" onchange="mudarModoTela()">
-                            <option value="auto">Detecção Automática</option>
-                            <option value="mobile">Forçar Modo Celular</option>
-                        </select>
-                    </div>
-                    <div class="grupo-ajuste">
-                        <label>Tipografia do Manuscrito</label>
-                        <select id="select-fonte" onchange="atualizarEstetica()">
-                            <option value="'Cormorant Garamond'">Cormorant Garamond (Clássico)</option>
-                            <option value="'Courier Prime'">Courier Prime (Máquina)</option>
-                            <option value="'Special Elite'">Special Elite (Vintage)</option>
-                            <option value="'Montserrat'">Montserrat (Digital)</option>
-                        </select>
-                    </div>
-                    <div class="grupo-ajuste slider-container">
-                        <label>Escala da Fonte</label>
-                        <input type="range" id="slider-tamanho" min="16" max="32" value="20" oninput="atualizarEstetica()">
-                    </div>
-                    <div class="grupo-ajuste slider-container">
-                        <label>Espaçamento Vertical (Line-height)</label>
-                        <input type="range" id="slider-linha" min="1.2" max="2.8" step="0.1" value="1.8" oninput="atualizarEstetica()">
-                    </div>
-                    <div class="grupo-ajuste">
-                        <label>Textura e Tom do Papel</label>
-                        <div class="cores-papel">
-                            <button class="c-branco" onclick="corPapel('#ffffff', '#222')" title="Branco Editorial"></button>
-                            <button class="c-creme" onclick="corPapel('#fdf6e3', '#444')" title="Papel Pólen / Marfim"></button>
-                            <button class="c-dark" onclick="corPapel('#1a1a1a', '#eee')" title="Scrivener Dark"></button>
-                        </div>
+                    <div id="resultados-busca">
+                        <p style="font-size: 0.8rem; opacity: 0.6; text-align: center; margin-top: 20px;">O acervo da L.F Productions aparecerá aqui.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="sidebar-footer">
-                <span id="status-salvamento" class="status-save">Manuscrito sincronizado</span>
-                <button class="btn-acao download" onclick="gerarPDF()"><span class="material-icons">picture_as_pdf</span> Exportar PDF</button>
+            <div class="painel-footer">
+                <div class="controles-estudio">
+                    <select id="sel-fonte" onchange="aplicarEstudio()" title="Fonte do Editor">
+                        <option value="'Cormorant Garamond', serif">Garamond</option>
+                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                        <option value="'Courier Prime', monospace">Máquina</option>
+                    </select>
+                    <select id="sel-tela" onchange="mudarModoTela()" title="Simulador de Tela">
+                        <option value="auto">Tela Automática</option>
+                        <option value="mobile">Modo Celular</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <span id="status-save" style="font-size: 0.7rem; color: #4caf50;">Salvo ✓</span>
+                    <button class="btn-premium" onclick="baixarPDF()">
+                        <span class="material-icons" style="font-size: 16px;">picture_as_pdf</span> Exportar Obra
+                    </button>
+                </div>
             </div>
         </aside>
 
-        <main class="palco-escrita">
-            <div id="folha-trabalho" class="papel">
-                <header class="papel-header">
-                    <div class="marca-dagua">L.F PRODUCTIONS | OFICINA DO ENREDO</div>
-                    <span id="contador">0 palavras</span>
-                </header>
-                <input type="text" id="titulo-livro" placeholder="Sem Título" oninput="salvarLocal()">
-                <textarea id="texto-principal" placeholder="Insira o texto da sua narrativa aqui para análise do sistema..." oninput="contarEsalvar()"></textarea>
+        <main class="area-escrita-wrapper">
+            <div class="btn-float pos-acessibilidade" onclick="alternarCorPapel()" title="Mudar cor do papel">
+                <span class="material-icons">contrast</span>
+            </div>
+
+            <div class="area-escrita" id="folha-pdf">
+                <div class="toolbar-editor">
+                    <span class="watermark-lf">L.F PRODUCTIONS</span>
+                    <span id="contador-palavras">0 palavras</span>
+                </div>
+                
+                <input type="text" id="titulo-obra" placeholder="O Título da sua Obra" oninput="salvarProgresso()">
+                <textarea id="editor-texto" placeholder="Era uma noite escura e tempestuosa..." oninput="contarPalavrasESalvar()"></textarea>
             </div>
         </main>
+        
     </div>
 
     <script src="script.js"></script>
