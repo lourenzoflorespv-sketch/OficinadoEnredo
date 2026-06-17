@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // --- SUA CHAVE DA API ---
-    const API_KEY = 'AQ.Ab8RN6K0ZqqJqdJGmlRIrmrvbReAKUVX9kNs_xdyKHHsO4XnkA'; 
+    const API_KEY = 'AQ.Ab8RN6L94FcL0tKHZXCxiTO3fDUgLTemSNErnbLGmxP2sA1Wtw'; 
 
     const corpo = document.body;
     let luzLigada = false;
