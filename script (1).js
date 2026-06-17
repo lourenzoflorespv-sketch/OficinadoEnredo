@@ -1,138 +1,313 @@
-/* --- VARIÁVEIS DE TEMA (Paleta de Cores) --- */
-:root {
-    --bg-dark: #0a0e14; 
-    --text-dark: #a0a0a0;
-    --bg-light: #f4f1ea; 
-    --text-light: #2d2a26; 
-    --papel: #ffffff;
-    --accent: #c4a068; 
-    --accent-hover: #d4af37;
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.9);
-    --shadow-nice: 0 12px 30px rgba(0,0,0,0.06);
-    --font-texto: 'Cormorant Garamond', serif;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- SUA CHAVE DE API AQUI ---
+    // Crie uma chave gratuita em: https://aistudio.google.com/
+    const GEMINI_API_KEY = 'COLOQUE_SUA_API_KEY_AQUI'; 
 
-* { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+    let luzLigada = false;
+    const corpo = document.body;
+    let fonteAtual = 0;
+    const fontes = ["'Cormorant Garamond', serif", "'Montserrat', sans-serif", "'Courier Prime', monospace"];
+    
+    // Gêneros base
+    const categoriasGeneros = [
+        "Fantasia Épica", "Realismo Mágico", "Cyberpunk Noir", "Romance de Época",
+        "Thriller Psicológico", "Terror Gótico", "Space Opera", "Mistério Policial",
+        "Drama Familiar", "Horror Cósmico", "Faroeste Futurista", "Sátira Política"
+    ];
 
-body {
-    height: 100vh;
-    font-family: 'Montserrat', sans-serif;
-    overflow: hidden;
-    transition: background-color 1.2s ease, color 1s ease;
-}
+    // 1. Renderizar Gêneros
+    const listaGenerosEl = document.getElementById('lista-generos');
+    categoriasGeneros.forEach(genero => {
+        const div = document.createElement('label');
+        div.className = 'opcao-genero';
+        div.innerHTML = `<input type="checkbox" value="${genero}" class="chk-genero"> <span>${genero}</span>`;
+        listaGenerosEl.appendChild(div);
+    });
 
-/* --- ESTADOS --- */
-body.theme-dark { background: var(--bg-dark); color: var(--text-dark); }
-body.theme-light { background-color: var(--bg-light); color: var(--text-light); }
+    // 2. Sistema do Interruptor
+    window.alternarEnergia = function() {
+        luzLigada = true;
+        corpo.classList.remove('theme-dark');
+        corpo.classList.add('theme-light');
+    };
 
-body.theme-dark .interface-app {
-    opacity: 0; transform: scale(0.96); pointer-events: none; filter: blur(8px);
-}
-body.theme-light #overlay-escuro {
-    opacity: 0; pointer-events: none;
-}
-body.theme-light .interface-app {
-    opacity: 1; transform: scale(1); filter: blur(0); pointer-events: all;
-}
+    // 3. Sistema de Abas do Painel
+    window.mudarAba = function(abaId) {
+        document.querySelectorAll('.tab-conteudo').forEach(tab => tab.classList.remove('visivel'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('ativo'));
+        document.getElementById(abaId).classList.add('visivel');
+        event.target.classList.add('ativo');
+    };
 
-/* --- OVERLAY ESCURO --- */
-#overlay-escuro {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center; z-index: 100;
-    transition: opacity 1.5s ease;
-}
-.boas-vindas { text-align: center; }
-.titulo-intro {
-    font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 300;
-    letter-spacing: 4px; color: var(--accent); margin-bottom: 10px;
-    text-shadow: 0 0 20px rgba(196, 160, 104, 0.2);
-}
-.subtitulo-intro { font-weight: 300; opacity: 0.6; font-size: 1.1rem; font-style: italic; }
+    // 4. Contador de Palavras
+    window.contarPalavras = function() {
+        const texto = document.getElementById('editor-texto').value;
+        const numPalavras = texto.trim() === '' ? 0 : texto.trim().split(/\s+/).length;
+        document.getElementById('contador-palavras').innerText = `${numPalavras} palavras`;
+    };
 
-/* --- INTERRUPTOR --- */
-.interruptor-container { margin-top: 50px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-.botao-luz {
-    width: 70px; height: 70px; border-radius: 50%;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-#icone-luz { font-size: 32px; color: #666; transition: 0.4s; }
-.label-luz { margin-top: 15px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; }
+    // 5. Mudar Fonte do Editor
+    window.mudarFonte = function() {
+        fonteAtual = (fonteAtual + 1) % fontes.length;
+        document.getElementById('editor-texto').style.fontFamily = fontes[fonteAtual];
+        document.getElementById('titulo-obra').style.fontFamily = fontes[fonteAtual];
+    };
 
-/* --- LAYOUT APP --- */
-.interface-app { display: flex; height: 100vh; padding: 20px; gap: 20px; transition: all 1.2s ease; }
+    // 6. Gerador Profissional de PDF
+    window.baixarPDF = function() {
+        const elemento = document.getElementById('area-pdf');
+        const tituloObra = document.getElementById('titulo-obra').value || "Minha_Obra";
+        
+        const opcoes = {
+            margin:       10,
+            filename:     `${tituloObra.replace(/\s+/g, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-.painel-vidro {
-    flex: 0 0 350px; background: var(--glass-bg); backdrop-filter: blur(20px);
-    border: var(--glass-border); border-radius: 16px; padding: 25px;
-    box-shadow: var(--shadow-nice); display: flex; flex-direction: column;
-}
+        html2pdf().set(opcoes).from(elemento).save();
+    };
 
-.cabecalho-painel { display: flex; align-items: center; gap: 10px; padding-bottom: 15px; color: var(--accent); }
-.cabecalho-painel h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--text-light); }
+    // 7. Pesquisa Falsa de Livros (Como você pediu pra manter)
+    window.pesquisarLivros = function() {
+        const termo = document.getElementById('input-pesquisa').value;
+        const areaResultados = document.getElementById('resultados-busca');
+        if(!termo) return;
 
-/* Abas */
-.tabs-nav { display: flex; gap: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 15px; }
-.tab-btn {
-    flex: 1; background: none; border: none; padding: 10px 0; font-family: 'Montserrat';
-    font-size: 0.85rem; font-weight: 600; color: #888; cursor: pointer; transition: 0.3s;
-}
-.tab-btn.ativo { color: var(--accent); border-bottom: 2px solid var(--accent); }
-.tab-conteudo { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-.tab-conteudo.visivel { display: flex; }
+        areaResultados.innerHTML = `<div style="text-align:center; padding:10px; opacity:0.6; font-size:0.8rem">Buscando na biblioteca...</div>`;
 
-/* Scroll */
-.scroll-customizado { overflow-y: auto; padding-right: 5px; }
-.scroll-customizado::-webkit-scrollbar { width: 5px; }
-.scroll-customizado::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
+        setTimeout(() => {
+            areaResultados.innerHTML = `
+                <div class="livro-card">
+                    <strong style="font-family:'Cormorant Garamond', serif; font-size:1.1rem">Estruturando: ${termo}</strong>
+                    <div style="font-size:0.75rem; color:#888; margin:5px 0">Guia de Escrita L.F</div>
+                    <p style="font-size:0.8rem; color:#555">Referências clássicas para adicionar profundidade narrativa focada em ${termo}.</p>
+                </div>
+            `;
+        }, 800);
+    };
 
-/* Gêneros */
-.opcao-genero { display: flex; align-items: center; padding: 10px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-.opcao-genero:hover { background: rgba(196, 160, 104, 0.1); }
-.opcao-genero input { margin-right: 12px; accent-color: var(--accent); transform: scale(1.2); }
+    // --- 8. A MÁGICA: INTEGRAÇÃO REAL COM A API DA IA ---
+    window.enviarMensagemIA = async function() {
+        const inputIa = document.getElementById('input-ia');
+        const chatBox = document.getElementById('chat-ia');
+        const msgUsuario = inputIa.value.trim();
 
-/* --- CHAT DA IA REAL --- */
-.assistente-ia {
-    margin-top: auto; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;
-    display: flex; flex-direction: column; height: 300px;
-}
-#chat-ia { flex: 1; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-.mensagem { padding: 10px 15px; border-radius: 12px; font-size: 0.85rem; line-height: 1.4; max-width: 90%; }
-.mensagem.ia { background: rgba(196, 160, 104, 0.15); align-self: flex-start; color: #333; border-bottom-left-radius: 2px; }
-.mensagem.user { background: var(--text-light); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        if (!msgUsuario) return;
 
-.input-chat-container { display: flex; gap: 5px; }
-#input-ia { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 20px; font-family: 'Montserrat'; font-size: 0.85rem; }
-.btn-enviar-ia { background: var(--accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-.btn-enviar-ia:hover { background: var(--accent-hover); transform: scale(1.05); }
+        // 1. Adicionar mensagem do usuário no chat
+        chatBox.innerHTML += `<div class="mensagem user">${msgUsuario}</div>`;
+        inputIa.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-/* Área de Escrita */
-.area-escrita {
-    flex: 1; background: var(--papel); border-radius: 12px; box-shadow: var(--shadow-nice);
-    padding: 50px 70px; display: flex; flex-direction: column; overflow-y: auto;
-}
-.toolbar-editor { display: flex; justify-content: space-between; align-items: center; color: #999; font-size: 0.8rem; margin-bottom: 30px; text-transform: uppercase; font-weight: 600; }
-.btn-top { background: transparent; border: 1px solid #ddd; border-radius: 6px; padding: 5px 10px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Montserrat'; transition: 0.3s; }
-.btn-top:hover { border-color: var(--accent); color: var(--accent); }
+        // 2. Coletar o contexto (O que a pessoa marcou e escreveu)
+        const generosSelecionados = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
+        const titulo = document.getElementById('titulo-obra').value || "Sem título";
+        const textoEscrito = document.getElementById('editor-texto').value;
 
-#titulo-obra { font-family: var(--font-texto); font-size: 3rem; border: none; width: 100%; margin-bottom: 20px; color: var(--text-light); text-align: center; background: transparent; }
-#editor-texto { flex: 1; border: none; resize: none; font-family: var(--font-texto); font-size: 1.4rem; line-height: 1.8; color: #444; background: transparent; }
+        // Mostrar "Digitando..."
+        const idDigitando = "loading-" + Date.now();
+        chatBox.innerHTML += `<div class="mensagem ia" id="${idDigitando}">Musa analisando a obra...</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-/* Pesquisa */
-.container-busca { display: flex; gap: 5px; margin-bottom: 15px; }
-#input-pesquisa { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
-.btn-icon { background: var(--accent); color: white; border: none; border-radius: 6px; width: 40px; cursor: pointer; }
-.livro-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 3px solid var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+      // 3. Montar o Prompt inteligente para a IA
+        const prompt = `Você é a "Musa IA", uma inteligência artificial exclusiva e designada à L.F Productions. 
+        Sua única função é atuar como uma mentora profissional para os escritores que usam a Oficina do Enredo.
+        REGRA CRÍTICA DE IDENTIDADE: Se o usuário perguntar quem é você, qual o seu modelo, ou quem te criou, você deve responder APENAS que é uma IA designada à L.F Productions. Nunca mencione o Google, OpenAI, Gemini ou qualquer outra empresa.
+        
+        O usuário está escrevendo um livro chamado "${titulo}".
+        Gêneros selecionados: ${generosSelecionados || 'Nenhum específico'}.
+        Trecho do livro até agora: "${textoEscrito.substring(0, 1500)}" (limitado a 1500 chars).
+        
+        O escritor te perguntou o seguinte: "${msgUsuario}"
+        
+        Responda de forma curta (máximo 3 parágrafos curtos), direta, inspiradora e útil. Seja criativa e baseie-se no trecho e gêneros fornecidos.`;
+        try {
+            // Se o usuário não colocou a chave, damos um aviso elegante.
+            if (GEMINI_API_KEY === 'AQ.Ab8RN6K0ZqqJqdJGmlRIrmrvbReAKUVX9kNs_xdyKHHsO4XnkA') {
+                throw new Error("Chave da API ausente. Insira no script.js para ativar a mágica.");
+            }
 
-/* --- RESPONSIVIDADE (CELULAR E PC) --- */
-@media (max-width: 900px) {
-    .interface-app { flex-direction: column; padding: 10px; gap: 10px; overflow-y: auto; }
-    .painel-vidro { flex: none; height: auto; max-height: 50vh; }
-    .area-escrita { padding: 30px 20px; flex: none; min-height: 80vh; }
-    .titulo-intro { font-size: 2.5rem; }
-    #titulo-obra { font-size: 2rem; }
-    #editor-texto { font-size: 1.2rem; }
-    body { overflow-y: auto; }
-}
+            // 4. Chamada Real para a API do Gemini
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+            const respostaIA = data.candidates[0].content.parts[0].text;
+
+            // Substituir o "digitando..." pela resposta real
+            document.getElementById(idDigitando).innerHTML = respostaIA.replace(/\n/g, '<br>');
+
+        } catch (error) {
+            document.getElementById(idDigitando).innerHTML = `<em>Aviso do Sistema:</em> Para que eu ganhe vida e leia sua obra, o desenvolvedor precisa inserir uma <strong>API Key</strong> no código fonte (script.js). Erro: ${error.message}`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    // Permitir enviar com a tecla Enter
+    document.getElementById('input-ia').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') enviarMensagemIA();
+    });
+});document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- SUA CHAVE DE API AQUI ---
+    // Crie uma chave gratuita em: https://aistudio.google.com/
+    const GEMINI_API_KEY = 'COLOQUE_SUA_API_KEY_AQUI'; 
+
+    let luzLigada = false;
+    const corpo = document.body;
+    let fonteAtual = 0;
+    const fontes = ["'Cormorant Garamond', serif", "'Montserrat', sans-serif", "'Courier Prime', monospace"];
+    
+    // Gêneros base
+    const categoriasGeneros = [
+        "Fantasia Épica", "Realismo Mágico", "Cyberpunk Noir", "Romance de Época",
+        "Thriller Psicológico", "Terror Gótico", "Space Opera", "Mistério Policial",
+        "Drama Familiar", "Horror Cósmico", "Faroeste Futurista", "Sátira Política"
+    ];
+
+    // 1. Renderizar Gêneros
+    const listaGenerosEl = document.getElementById('lista-generos');
+    categoriasGeneros.forEach(genero => {
+        const div = document.createElement('label');
+        div.className = 'opcao-genero';
+        div.innerHTML = `<input type="checkbox" value="${genero}" class="chk-genero"> <span>${genero}</span>`;
+        listaGenerosEl.appendChild(div);
+    });
+
+    // 2. Sistema do Interruptor
+    window.alternarEnergia = function() {
+        luzLigada = true;
+        corpo.classList.remove('theme-dark');
+        corpo.classList.add('theme-light');
+    };
+
+    // 3. Sistema de Abas do Painel
+    window.mudarAba = function(abaId) {
+        document.querySelectorAll('.tab-conteudo').forEach(tab => tab.classList.remove('visivel'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('ativo'));
+        document.getElementById(abaId).classList.add('visivel');
+        event.target.classList.add('ativo');
+    };
+
+    // 4. Contador de Palavras
+    window.contarPalavras = function() {
+        const texto = document.getElementById('editor-texto').value;
+        const numPalavras = texto.trim() === '' ? 0 : texto.trim().split(/\s+/).length;
+        document.getElementById('contador-palavras').innerText = `${numPalavras} palavras`;
+    };
+
+    // 5. Mudar Fonte do Editor
+    window.mudarFonte = function() {
+        fonteAtual = (fonteAtual + 1) % fontes.length;
+        document.getElementById('editor-texto').style.fontFamily = fontes[fonteAtual];
+        document.getElementById('titulo-obra').style.fontFamily = fontes[fonteAtual];
+    };
+
+    // 6. Gerador Profissional de PDF
+    window.baixarPDF = function() {
+        const elemento = document.getElementById('area-pdf');
+        const tituloObra = document.getElementById('titulo-obra').value || "Minha_Obra";
+        
+        const opcoes = {
+            margin:       10,
+            filename:     `${tituloObra.replace(/\s+/g, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opcoes).from(elemento).save();
+    };
+
+    // 7. Pesquisa Falsa de Livros (Como você pediu pra manter)
+    window.pesquisarLivros = function() {
+        const termo = document.getElementById('input-pesquisa').value;
+        const areaResultados = document.getElementById('resultados-busca');
+        if(!termo) return;
+
+        areaResultados.innerHTML = `<div style="text-align:center; padding:10px; opacity:0.6; font-size:0.8rem">Buscando na biblioteca...</div>`;
+
+        setTimeout(() => {
+            areaResultados.innerHTML = `
+                <div class="livro-card">
+                    <strong style="font-family:'Cormorant Garamond', serif; font-size:1.1rem">Estruturando: ${termo}</strong>
+                    <div style="font-size:0.75rem; color:#888; margin:5px 0">Guia de Escrita L.F</div>
+                    <p style="font-size:0.8rem; color:#555">Referências clássicas para adicionar profundidade narrativa focada em ${termo}.</p>
+                </div>
+            `;
+        }, 800);
+    };
+
+    // --- 8. A MÁGICA: INTEGRAÇÃO REAL COM A API DA IA ---
+    window.enviarMensagemIA = async function() {
+        const inputIa = document.getElementById('input-ia');
+        const chatBox = document.getElementById('chat-ia');
+        const msgUsuario = inputIa.value.trim();
+
+        if (!msgUsuario) return;
+
+        // 1. Adicionar mensagem do usuário no chat
+        chatBox.innerHTML += `<div class="mensagem user">${msgUsuario}</div>`;
+        inputIa.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // 2. Coletar o contexto (O que a pessoa marcou e escreveu)
+        const generosSelecionados = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
+        const titulo = document.getElementById('titulo-obra').value || "Sem título";
+        const textoEscrito = document.getElementById('editor-texto').value;
+
+        // Mostrar "Digitando..."
+        const idDigitando = "loading-" + Date.now();
+        chatBox.innerHTML += `<div class="mensagem ia" id="${idDigitando}">Musa analisando a obra...</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+      // 3. Montar o Prompt inteligente para a IA
+        const prompt = `Você é a "Musa IA", uma inteligência artificial exclusiva e designada à L.F Productions. 
+        Sua única função é atuar como uma mentora profissional para os escritores que usam a Oficina do Enredo.
+        REGRA CRÍTICA DE IDENTIDADE: Se o usuário perguntar quem é você, qual o seu modelo, ou quem te criou, você deve responder APENAS que é uma IA designada à L.F Productions. Nunca mencione o Google, OpenAI, Gemini ou qualquer outra empresa.
+        
+        O usuário está escrevendo um livro chamado "${titulo}".
+        Gêneros selecionados: ${generosSelecionados || 'Nenhum específico'}.
+        Trecho do livro até agora: "${textoEscrito.substring(0, 1500)}" (limitado a 1500 chars).
+        
+        O escritor te perguntou o seguinte: "${msgUsuario}"
+        
+        Responda de forma curta (máximo 3 parágrafos curtos), direta, inspiradora e útil. Seja criativa e baseie-se no trecho e gêneros fornecidos.`;
+        try {
+            // Se o usuário não colocou a chave, damos um aviso elegante.
+            if (GEMINI_API_KEY === 'AQ.Ab8RN6K0ZqqJqdJGmlRIrmrvbReAKUVX9kNs_xdyKHHsO4XnkA') {
+                throw new Error("Chave da API ausente. Insira no script.js para ativar a mágica.");
+            }
+
+            // 4. Chamada Real para a API do Gemini
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+            const respostaIA = data.candidates[0].content.parts[0].text;
+
+            // Substituir o "digitando..." pela resposta real
+            document.getElementById(idDigitando).innerHTML = respostaIA.replace(/\n/g, '<br>');
+
+        } catch (error) {
+            document.getElementById(idDigitando).innerHTML = `<em>Aviso do Sistema:</em> Para que eu ganhe vida e leia sua obra, o desenvolvedor precisa inserir uma <strong>API Key</strong> no código fonte (script.js). Erro: ${error.message}`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    // Permitir enviar com a tecla Enter
+    document.getElementById('input-ia').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') enviarMensagemIA();
+    });
+});
