@@ -41,99 +41,99 @@
         <aside class="sidebar-vidro">
             <div class="logo-area">
                 <h1>Oficina do Enredo</h1>
-                <p>ESTÚDIO CRIATIVO</p>
+                <p>ESTÚDIO CRIATIVO | L.F PRODUCTIONS</p>
             </div>
 
             <nav class="abas-nav">
-                <button class="aba-btn ativa" onclick="trocarAba('aba-ia')" title="Musa IA"><span class="material-icons">psychology</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-generos')" title="Gêneros"><span class="material-icons">category</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-biblioteca')" title="Biblioteca"><span class="material-icons">auto_stories</span></button>
-                <button class="aba-btn" onclick="trocarAba('aba-ajustes')" title="Configurações"><span class="material-icons">tune</span></button>
+                <button class="aba-btn ativa" onclick="trocarAba('aba-ia')" title="Auxílio Oficina do Enredo"><span class="material-icons">terminal</span></button>
+                <button class="aba-btn" onclick="trocarAba('aba-generos')" title="Configurar Gêneros"><span class="material-icons">style</span></button>
+                <button class="aba-btn" onclick="trocarAba('aba-biblioteca')" title="Biblioteca de Referências"><span class="material-icons">local_library</span></button>
+                <button class="aba-btn" onclick="trocarAba('aba-ajustes')" title="Ajustes do Estúdio"><span class="material-icons">tune</span></button>
             </nav>
 
             <div class="conteudo-abas">
                 
                 <div id="aba-ia" class="aba-item visivel">
                     <div class="ia-acoes-rapidas">
-                        <button onclick="acaoRapidaIA('Sugira uma reviravolta surpreendente para o trecho que escrevi.')">Reviravolta</button>
-                        <button onclick="acaoRapidaIA('Faça uma análise crítica construtiva do meu texto.')">Analisar</button>
-                        <button onclick="acaoRapidaIA('Crie um conceito de personagem novo que se encaixe no meu enredo.')">Personagem</button>
+                        <button onclick="acaoRapidaIA('Analise o enredo do meu texto e sugira um ponto de virada dramática.')">Ponto de Virada</button>
+                        <button onclick="acaoRapidaIA('Verifique a consistência narrativa e o ritmo do trecho escrito.')">Análise de Ritmo</button>
+                        <button onclick="acaoRapidaIA('Desenvolva um antagonista complexo que se oponha a esta narrativa.')">Gerar Oponente</button>
                     </div>
                     <div class="chat-container scroll-custom" id="chat-ia">
-                        <div class="msg ia">Saudações. Sou a Musa IA da <strong>L.F Productions</strong>. Seu trabalho é salvo automaticamente. Como posso inspirar sua escrita hoje?</div>
+                        <div class="msg ia">Sistema Iniciado. Sou o <strong>Auxílio da Oficina do Enredo</strong>, sua ferramenta de análise literária designada à L.F Productions. Como posso otimizar sua narrativa hoje?</div>
                     </div>
                     <div class="input-area-ia">
-                        <input type="text" id="pergunta-ia" placeholder="Pergunte à Musa...">
+                        <input type="text" id="pergunta-ia" placeholder="Solicite assistência ao sistema...">
                         <button onclick="comunicarIA()"><span class="material-icons">send</span></button>
                     </div>
                 </div>
 
                 <div id="aba-generos" class="aba-item scroll-custom">
-                    <p class="instrucao-aba">Selecione a essência da sua obra para guiar a IA:</p>
+                    <p class="instrucao-aba">Selecione as vertentes que compõem a matriz da sua história:</p>
                     <div id="lista-generos" class="grid-generos">
                         </div>
                 </div>
 
                 <div id="aba-biblioteca" class="aba-item">
                     <div class="busca-caixa">
-                        <input type="text" id="busca-livro" placeholder="Pesquisar referências L.F...">
+                        <input type="text" id="busca-livro" placeholder="Pesquisar referências no acervo...">
                         <button onclick="pesquisaReal()"><span class="material-icons">search</span></button>
                     </div>
                     <div id="resultados-biblioteca" class="scroll-custom">
-                        <div class="msg ia" style="opacity: 0.7;">Busque por temas como "Vilões", "Diálogos" ou "Construção de Mundo".</div>
+                        <div class="msg ia" style="opacity: 0.7;">Consulte termos chaves da literatura (ex: "Vilões", "Jornada do Herói", "Ganchos").</div>
                     </div>
                 </div>
 
                 <div id="aba-ajustes" class="aba-item scroll-custom">
                     <div class="grupo-ajuste">
-                        <label>Visualização de Tela</label>
+                        <label>Simulador de Dispositivo</label>
                         <select id="select-view" onchange="mudarModoTela()">
-                            <option value="auto">Automático (Padrão)</option>
-                            <option value="mobile">Simular Celular</option>
+                            <option value="auto">Detecção Automática</option>
+                            <option value="mobile">Forçar Modo Celular</option>
                         </select>
                     </div>
                     <div class="grupo-ajuste">
-                        <label>Fonte do Manuscrito</label>
+                        <label>Tipografia do Manuscrito</label>
                         <select id="select-fonte" onchange="atualizarEstetica()">
-                            <option value="'Cormorant Garamond'">Clássico (Garamond)</option>
-                            <option value="'Courier Prime'">Máquina de Escrever</option>
-                            <option value="'Special Elite'">Vintage Retro</option>
-                            <option value="'Montserrat'">Moderno e Limpo</option>
+                            <option value="'Cormorant Garamond'">Cormorant Garamond (Clássico)</option>
+                            <option value="'Courier Prime'">Courier Prime (Máquina)</option>
+                            <option value="'Special Elite'">Special Elite (Vintage)</option>
+                            <option value="'Montserrat'">Montserrat (Digital)</option>
                         </select>
                     </div>
                     <div class="grupo-ajuste slider-container">
-                        <label>Tamanho da Fonte</label>
+                        <label>Escala da Fonte</label>
                         <input type="range" id="slider-tamanho" min="16" max="32" value="20" oninput="atualizarEstetica()">
                     </div>
                     <div class="grupo-ajuste slider-container">
-                        <label>Espaçamento das Linhas</label>
-                        <input type="range" id="slider-linha" min="1.2" max="2.5" step="0.1" value="1.8" oninput="atualizarEstetica()">
+                        <label>Espaçamento Vertical (Line-height)</label>
+                        <input type="range" id="slider-linha" min="1.2" max="2.8" step="0.1" value="1.8" oninput="atualizarEstetica()">
                     </div>
                     <div class="grupo-ajuste">
-                        <label>Cor do Papel</label>
+                        <label>Textura e Tom do Papel</label>
                         <div class="cores-papel">
-                            <button class="c-branco" onclick="corPapel('#ffffff', '#222')" title="Branco Puro"></button>
-                            <button class="c-creme" onclick="corPapel('#fdf6e3', '#444')" title="Marfim"></button>
-                            <button class="c-dark" onclick="corPapel('#1a1a1a', '#eee')" title="Modo Noturno"></button>
+                            <button class="c-branco" onclick="corPapel('#ffffff', '#222')" title="Branco Editorial"></button>
+                            <button class="c-creme" onclick="corPapel('#fdf6e3', '#444')" title="Papel Pólen / Marfim"></button>
+                            <button class="c-dark" onclick="corPapel('#1a1a1a', '#eee')" title="Scrivener Dark"></button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="sidebar-footer">
-                <span id="status-salvamento" class="status-save">Salvo no navegador</span>
-                <button class="btn-acao download" onclick="gerarPDF()"><span class="material-icons">picture_as_pdf</span> PDF</button>
+                <span id="status-salvamento" class="status-save">Manuscrito sincronizado</span>
+                <button class="btn-acao download" onclick="gerarPDF()"><span class="material-icons">picture_as_pdf</span> Exportar PDF</button>
             </div>
         </aside>
 
         <main class="palco-escrita">
             <div id="folha-trabalho" class="papel">
                 <header class="papel-header">
-                    <div class="marca-dagua">L.F PRODUCTIONS</div>
+                    <div class="marca-dagua">L.F PRODUCTIONS | OFICINA DO ENREDO</div>
                     <span id="contador">0 palavras</span>
                 </header>
-                <input type="text" id="titulo-livro" placeholder="O Título da Obra" oninput="salvarLocal()">
-                <textarea id="texto-principal" placeholder="Sua história imortal começa aqui..." oninput="contarEsalvar()"></textarea>
+                <input type="text" id="titulo-livro" placeholder="Sem Título" oninput="salvarLocal()">
+                <textarea id="texto-principal" placeholder="Insira o texto da sua narrativa aqui para análise do sistema..." oninput="contarEsalvar()"></textarea>
             </div>
         </main>
     </div>
