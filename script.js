@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- SUA CHAVE DA API ---
+    // ==========================================
+    // 1. CONFIGURAÇÃO DA API (GROQ)
+    // ==========================================
+    // Cole sua NOVA chave aqui entre as aspas:
     const API_KEY = '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'; 
 
     const corpo = document.body;
@@ -13,7 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const editor = document.getElementById('editor-texto');
     const titulo = document.getElementById('titulo-obra');
 
-    // 1. O INTERRUPTOR (Animação Original L.F)
+    // ==========================================
+    // 2. O INTERRUPTOR (Animação Original L.F)
+    // ==========================================
     window.alternarEnergia = function() {
         if(luzLigada) return; // Se já ligou, ignora.
 
@@ -34,7 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     };
 
-    // 2. SISTEMA DE ABAS (Glassmorphism Sidebar)
+    // ==========================================
+    // 3. SISTEMA DE ABAS (Glassmorphism Sidebar)
+    // ==========================================
     window.mudarAba = function(abaId) {
         document.querySelectorAll('.tab-conteudo').forEach(tab => tab.classList.remove('visivel'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('ativo'));
@@ -43,7 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
         event.target.classList.add('ativo');
     };
 
-    // 3. GÊNEROS LITERÁRIOS
+    // ==========================================
+    // 4. GÊNEROS LITERÁRIOS
+    // ==========================================
     const categoriasGeneros = [
         "Fantasia Épica", "Realismo Mágico", "Cyberpunk Noir", "Romance de Época",
         "Thriller Psicológico", "Terror Gótico", "Space Opera", "Mistério Policial",
@@ -58,46 +67,61 @@ document.addEventListener('DOMContentLoaded', () => {
         listaGenerosEl.appendChild(label);
     });
 
-    // 4. MUSA IA DA L.F PRODUCTIONS (O Cérebro)
-  window.enviarMensagemIA = async function(textoForcado = null) {
+    // ==========================================
+    // 5. MUSA IA DA L.F PRODUCTIONS (Cérebro Groq)
+    // ==========================================
+    window.enviarMensagemIA = async function(textoForcado = null) {
         const msgUsuario = textoForcado ? textoForcado : inputIa.value.trim();
         if (!msgUsuario) return;
 
+        // Imprime a mensagem do usuário
         chatBox.innerHTML += `<div class="mensagem user">${msgUsuario}</div>`;
         if(!textoForcado) inputIa.value = '';
         chatBox.scrollTop = chatBox.scrollHeight;
 
+        // Cria o balão de carregamento
         const idAguarde = "sys-" + Date.now();
-        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Analisando os dados da Oficina...</div>`;
+        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">O Núcleo L.F está processando via Groq...</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
+        // Coleta o contexto
         const generos = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
         
         const promptSistema = `Você é a IA oficial de auxílio literário da empresa L.F Productions.
-        Dados da Obra: Título: ${titulo.value || 'Desconhecido'} | Gêneros: ${generos || 'Não marcados'}
-        Trecho atual: "${editor.value.substring(0, 1500)}"
-        O escritor solicitou: "${msgUsuario}"
-        Responda de forma técnica e profissional (máximo 3 parágrafos curtos).`;
+        REGRA MÁXIMA: Se perguntarem sua identidade ou criador, responda estritamente que é a IA designada à L.F Productions. Jamais mencione a Groq, OpenAI ou Google.
+        
+        Dados da Obra:
+        - Título: ${titulo.value || 'Desconhecido'}
+        - Gêneros: ${generos || 'Não marcados'}
+        - Trecho atual do livro: "${editor.value.substring(0, 1500)}"
+        
+        Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
         try {
-            // Requisição SEM o ?key na URL, usando apenas o Header
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
+            const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'x-goog-api-key': API_KEY // A sua chave AQ... entra aqui!
+                    'Authorization': `Bearer ${API_KEY}`
                 },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptSistema }] }] })
+                body: JSON.stringify({
+                    model: "llama3-8b-8192", // Modelo ultra-rápido da Groq
+                    messages: [
+                        { role: "system", content: promptSistema },
+                        { role: "user", content: msgUsuario }
+                    ],
+                    temperature: 0.7
+                })
             });
 
             const data = await response.json();
             
-            // Força a exibição do erro se o Google recusar
+            // Diagnóstico de erro
             if (!response.ok) {
                 throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
             }
             
-            const textoFinal = data.candidates[0].content.parts[0].text;
+            const textoFinal = data.choices[0].message.content;
             document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
 
         } catch (error) {
@@ -107,7 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBox.scrollTop = chatBox.scrollHeight;
     };
 
-    // 5. AJUSTES DO ESTÚDIO E SIMULADOR
+    window.acaoIA = function(texto) {
+        enviarMensagemIA(texto);
+    };
+
+    window.verificarEnter = function(e) {
+        if(e.key === 'Enter') enviarMensagemIA();
+    };
+
+    // ==========================================
+    // 6. AJUSTES DO ESTÚDIO E SIMULADOR
+    // ==========================================
     window.aplicarEstudio = function() {
         const fonte = document.getElementById('sel-fonte').value;
         editor.style.fontFamily = fonte;
@@ -130,7 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 6. BIBLIOTECA SIMULADA
+    // ==========================================
+    // 7. BIBLIOTECA SIMULADA
+    // ==========================================
     window.pesquisarLivros = function() {
         const termo = document.getElementById('input-pesquisa').value;
         const areaRes = document.getElementById('resultados-busca');
@@ -148,7 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     };
 
-    // 7. AUTO-SAVE E GERADOR DE PDF
+    // ==========================================
+    // 8. AUTO-SAVE E GERADOR DE PDF
+    // ==========================================
     window.contarPalavrasESalvar = function() {
         const txt = editor.value.trim();
         const palavras = txt === '' ? 0 : txt.split(/\s+/).length;
@@ -164,8 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('lf_generos_v2', JSON.stringify(generos));
 
         const status = document.getElementById('status-save');
-        status.innerText = "Salvo ✓";
-        status.style.color = "#4caf50";
+        if(status) {
+            status.innerText = "Salvo ✓";
+            status.style.color = "#4caf50";
+        }
     };
 
     function carregarAutoSave() {
