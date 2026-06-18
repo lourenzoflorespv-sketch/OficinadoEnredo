@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. CONFIGURAÇÃO DA API (GROQ)
     // ==========================================
     // Cole sua NOVA chave aqui entre as aspas:
-    const API_KEY = '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'; 
+    const API_KEY = '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'; 
 
     const corpo = document.body;
     let luzLigada = false;
