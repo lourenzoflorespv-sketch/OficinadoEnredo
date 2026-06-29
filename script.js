@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 1. CONFIGURAÇÃO DA API 
     // ==========================================
-    // Cole sua NOVA chave aqui entre as aspas:
+    // Cole sua NOVA chave ativa aqui entre as aspas:
     const API_KEY = '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'; 
 
     const corpo = document.body;
@@ -26,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         setTimeout(() => {
             const poema = document.getElementById('camada-poema');
-            poema.style.opacity = '1';
+            if(poema) poema.style.opacity = '1';
             
             setTimeout(() => {
-                poema.style.opacity = '0';
+                if(poema) poema.style.opacity = '0';
                 corpo.classList.add('luz-acesa');
                 luzLigada = true;
                 carregarAutoSave();
@@ -44,7 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.tab-conteudo').forEach(tab => tab.classList.remove('visivel'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('ativo'));
         
-        document.getElementById(abaId).classList.add('visivel');
+        const abaAlvo = document.getElementById(abaId);
+        if(abaAlvo) abaAlvo.classList.add('visivel');
+        
         if (event && event.target) {
             event.target.classList.add('ativo');
         }
@@ -61,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const listaGenerosEl = document.getElementById('lista-generos');
     if (listaGenerosEl) {
+        listaGenerosEl.innerHTML = ''; // Evita duplicar elementos
         categoriasGeneros.forEach(genero => {
             const label = document.createElement('label');
             label.className = 'opcao-genero';
@@ -69,24 +72,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-// ==========================================
-    // 5. QUESTIONS IA (Cérebro Anthropic Claude)
+    // ==========================================
+    // 5. QUESTIONS IA (Cérebro Anthropic Claude com Proxy)
     // ==========================================
     window.enviarMensagemIA = async function(textoForcado = null) {
         const msgUsuario = textoForcado ? textoForcado : inputIa.value.trim();
         if (!msgUsuario) return;
 
-        // Imprime a mensagem do usuário
-        chatBox.innerHTML += `<div class="mensagem user">${msgUsuario}</div>`;
-        if(!textoForcado) inputIa.value = '';
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // Imprime a mensagem do usuário no chat
+        if(chatBox) {
+            chatBox.innerHTML += `<div class="mensagem user">${msgUsuario}</div>`;
+            if(!textoForcado) inputIa.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-        // Cria o balão de carregamento
+        // Cria o balão de carregamento provisório
         const idAguarde = "sys-" + Date.now();
-        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Questions IA está processando via Anthropic...</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+        if(chatBox) {
+            chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Questions IA está processando via Anthropic...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-        // Coleta o contexto
+        // Coleta o contexto dinâmico do editor
         const generos = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
         const trechoTexto = editor ? editor.value.substring(0, 1500) : "";
         const tituloTexto = titulo ? titulo.value : 'Desconhecido';
@@ -102,14 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
         try {
-            const response = await fetch(`https://api.anthropic.com/v1/messages`, {
+            // Utiliza o proxy cors-anywhere para garantir que o navegador não bloqueie a requisição
+            const urlProxy = 'https://cors-anywhere.herokuapp.com/';
+            const urlAnthropic = 'https://api.anthropic.com/v1/messages';
+
+            const response = await fetch(urlProxy + urlAnthropic, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'x-api-key': API_KEY,
-                    'anthropic-version': '2023-06-01',
-                    // Cabeçalho oficial necessário para rodar direto do navegador (front-end)
-                    'anthropic-dangerous-direct-browser-access': 'true' 
+                    'anthropic-version': '2023-06-01'
                 },
                 body: JSON.stringify({
                     model: "claude-3-5-sonnet-20241022", 
@@ -123,20 +132,40 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            const elementoDestino = document.getElementById(idAguarde);
             
             if (!response.ok) {
+                // Se o proxy exigir ativação temporária
+                if(response.status === 403) {
+                    throw new Error("Por favor, acesse primeiro https://cors-anywhere.herokuapp.com/corsdemo e clique no botão para ativar o acesso temporário de testes.");
+                }
                 throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
             }
             
-            const textoFinal = data.content[0].text;
-            document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
+            if(elementoDestino && data.content && data.content[0]) {
+                const textoFinal = data.content[0].text;
+                elementoDestino.innerHTML = textoFinal.replace(/\n/g, '<br>');
+            }
 
         } catch (error) {
-            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Falha na conexão. Detalhe: ${error.message}</span>`;
+            const elementoDestino = document.getElementById(idAguarde);
+            if(elementoDestino) {
+                elementoDestino.innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Erro. Detalhe: ${error.message}</span>`;
+            }
             console.error("Detalhes do erro:", error);
         }
-        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     };
+
+    window.acaoIA = function(texto) {
+        enviarMensagemIA(texto);
+    };
+
+    window.verificarEnter = function(e) {
+        if(e.key === 'Enter') enviarMensagemIA();
+    };
+
     // ==========================================
     // 6. AJUSTES DO ESTÚDIO E SIMULADOR
     // ==========================================
@@ -237,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const nomeArq = (titulo && titulo.value) ? titulo.value : "Obra_LF_Productions";
         
-        // Certifique-se de que a biblioteca html2pdf.js está incluída no seu HTML
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set({
                 margin: 15,
