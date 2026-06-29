@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. CONFIGURAÇÃO DA API 
     // ==========================================
     // Cole sua NOVA chave ativa aqui entre as aspas:
-    const API_KEY = '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'; 
+    const API_KEY = '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'; 
 
     const corpo = document.body;
     let luzLigada = false;
