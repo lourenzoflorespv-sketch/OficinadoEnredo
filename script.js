@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================
-    // 1. CONFIGURAÇÃO DA API (GROQ)
+    // 1. CONFIGURAÇÃO DA API 
     // ==========================================
     // Cole sua NOVA chave aqui entre as aspas:
-    const API_KEY = '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'; 
+    const API_KEY = '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'; 
 
     const corpo = document.body;
     let luzLigada = false;
@@ -17,37 +17,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const titulo = document.getElementById('titulo-obra');
 
     // ==========================================
-    // 2. O INTERRUPTOR (Animação Original L.F)
+    // 2. O INTERRUPTOR (Animação)
     // ==========================================
     window.alternarEnergia = function() {
-        if(luzLigada) return; // Se já ligou, ignora.
+        if(luzLigada) return;
 
         corpo.classList.add('movendo-luz');
         
-        // Fase 1: Mostra o Poema
         setTimeout(() => {
             const poema = document.getElementById('camada-poema');
             poema.style.opacity = '1';
             
-            // Fase 2: Acende a luz e revela o App
             setTimeout(() => {
                 poema.style.opacity = '0';
                 corpo.classList.add('luz-acesa');
                 luzLigada = true;
-                carregarAutoSave(); // Puxa dados salvos após ligar
+                carregarAutoSave();
             }, 3500); 
         }, 800);
     };
 
     // ==========================================
-    // 3. SISTEMA DE ABAS (Glassmorphism Sidebar)
+    // 3. SISTEMA DE ABAS
     // ==========================================
-    window.mudarAba = function(abaId) {
+    window.mudarAba = function(abaId, event) {
         document.querySelectorAll('.tab-conteudo').forEach(tab => tab.classList.remove('visivel'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('ativo'));
         
         document.getElementById(abaId).classList.add('visivel');
-        event.target.classList.add('ativo');
+        if (event && event.target) {
+            event.target.classList.add('ativo');
+        }
     };
 
     // ==========================================
@@ -60,15 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     
     const listaGenerosEl = document.getElementById('lista-generos');
-    categoriasGeneros.forEach(genero => {
-        const label = document.createElement('label');
-        label.className = 'opcao-genero';
-        label.innerHTML = `<input type="checkbox" value="${genero}" class="chk-genero" onchange="salvarProgresso()"> <span>${genero}</span>`;
-        listaGenerosEl.appendChild(label);
-    });
+    if (listaGenerosEl) {
+        categoriasGeneros.forEach(genero => {
+            const label = document.createElement('label');
+            label.className = 'opcao-genero';
+            label.innerHTML = `<input type="checkbox" value="${genero}" class="chk-genero" onchange="salvarProgresso()"> <span>${genero}</span>`;
+            listaGenerosEl.appendChild(label);
+        });
+    }
 
     // ==========================================
-    // 5. MUSA IA DA L.F PRODUCTIONS (Cérebro Groq)
+    // 5. QUESTIONS IA 
     // ==========================================
     window.enviarMensagemIA = async function(textoForcado = null) {
         const msgUsuario = textoForcado ? textoForcado : inputIa.value.trim();
@@ -81,19 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cria o balão de carregamento
         const idAguarde = "sys-" + Date.now();
-        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">O Núcleo L.F está processando via Groq...</div>`;
+        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Questions IA está processando sua solicitação...</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
         // Coleta o contexto
         const generos = Array.from(document.querySelectorAll('.chk-genero:checked')).map(x => x.value).join(', ');
+        const trechoTexto = editor ? editor.value.substring(0, 1500) : "";
+        const tituloTexto = titulo ? titulo.value : 'Desconhecido';
         
-        const promptSistema = `Você é a IA oficial de auxílio literário da empresa L.F Productions.
-        REGRA MÁXIMA: Se perguntarem sua identidade ou criador, responda estritamente que é a IA designada à L.F Productions. Jamais mencione a Groq, OpenAI ou Google.
+        const promptSistema = `Você é a "Questions IA", a inteligência artificial oficial de auxílio literário da empresa L.F Productions.
+        REGRA MÁXIMA: Se perguntarem sua identidade, responda estritamente que você é a Questions IA.
         
         Dados da Obra:
-        - Título: ${titulo.value || 'Desconhecido'}
+        - Título: ${tituloTexto}
         - Gêneros: ${generos || 'Não marcados'}
-        - Trecho atual do livro: "${editor.value.substring(0, 1500)}"
+        - Trecho atual do livro: "${trechoTexto}"
         
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
@@ -105,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Authorization': `Bearer ${API_KEY}`
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192", // Modelo ultra-rápido da Groq
+                    model: "llama3-8b-8192", 
                     messages: [
                         { role: "system", content: promptSistema },
                         { role: "user", content: msgUsuario }
@@ -116,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // Diagnóstico de erro
             if (!response.ok) {
                 throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
             }
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
 
         } catch (error) {
-            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico L.F Productions:</strong> <span style="color:#e74c3c;">${error.message}</span>`;
+            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Falha na conexão. Verifique sua chave API ou internet. Detalhe: ${error.message}</span>`;
             console.error("Detalhes do erro:", error);
         }
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -143,16 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. AJUSTES DO ESTÚDIO E SIMULADOR
     // ==========================================
     window.aplicarEstudio = function() {
-        const fonte = document.getElementById('sel-fonte').value;
-        editor.style.fontFamily = fonte;
-        titulo.style.fontFamily = fonte;
+        const fonteEl = document.getElementById('sel-fonte');
+        if (fonteEl && editor && titulo) {
+            const fonte = fonteEl.value;
+            editor.style.fontFamily = fonte;
+            titulo.style.fontFamily = fonte;
+        }
     };
 
     window.mudarModoTela = function() {
-        const modo = document.getElementById('sel-tela').value;
+        const modoEl = document.getElementById('sel-tela');
         const app = document.getElementById('app-main');
-        app.classList.remove('force-mobile');
-        if(modo === 'mobile') app.classList.add('force-mobile');
+        if (modoEl && app) {
+            const modo = modoEl.value;
+            app.classList.remove('force-mobile');
+            if(modo === 'mobile') app.classList.add('force-mobile');
+        }
     };
 
     window.alternarCorPapel = function() {
@@ -168,11 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7. BIBLIOTECA SIMULADA
     // ==========================================
     window.pesquisarLivros = function() {
-        const termo = document.getElementById('input-pesquisa').value;
+        const termoEl = document.getElementById('input-pesquisa');
         const areaRes = document.getElementById('resultados-busca');
+        
+        if(!termoEl || !areaRes) return;
+        const termo = termoEl.value;
         if(!termo) return;
 
-        areaRes.innerHTML = `<div style="text-align:center; opacity:0.6; padding:10px;">Buscando referências na L.F Lib...</div>`;
+        areaRes.innerHTML = `<div style="text-align:center; opacity:0.6; padding:10px;">Buscando referências...</div>`;
         
         setTimeout(() => {
             areaRes.innerHTML = `
@@ -188,15 +200,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. AUTO-SAVE E GERADOR DE PDF
     // ==========================================
     window.contarPalavrasESalvar = function() {
+        if (!editor) return;
         const txt = editor.value.trim();
         const palavras = txt === '' ? 0 : txt.split(/\s+/).length;
-        document.getElementById('contador-palavras').innerText = `${palavras} palavras`;
+        const contador = document.getElementById('contador-palavras');
+        if (contador) contador.innerText = `${palavras} palavras`;
         salvarProgresso();
     };
 
     window.salvarProgresso = function() {
-        localStorage.setItem('lf_titulo_v2', titulo.value);
-        localStorage.setItem('lf_texto_v2', editor.value);
+        if(titulo) localStorage.setItem('lf_titulo_v2', titulo.value);
+        if(editor) localStorage.setItem('lf_texto_v2', editor.value);
         
         const generos = Array.from(document.querySelectorAll('.chk-genero:checked')).map(el => el.value);
         localStorage.setItem('lf_generos_v2', JSON.stringify(generos));
@@ -210,8 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function carregarAutoSave() {
         if(localStorage.getItem('lf_texto_v2') !== null) {
-            titulo.value = localStorage.getItem('lf_titulo_v2') || '';
-            editor.value = localStorage.getItem('lf_texto_v2') || '';
+            if(titulo) titulo.value = localStorage.getItem('lf_titulo_v2') || '';
+            if(editor) editor.value = localStorage.getItem('lf_texto_v2') || '';
             
             const genSalvos = JSON.parse(localStorage.getItem('lf_generos_v2') || "[]");
             document.querySelectorAll('.chk-genero').forEach(box => {
@@ -224,13 +238,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.baixarPDF = function() {
         const folha = document.getElementById('folha-pdf');
-        const nomeArq = titulo.value || "Obra_LF_Productions";
-        html2pdf().set({
-            margin: 15,
-            filename: `${nomeArq.replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(folha).save();
+        if (!folha) return;
+        
+        const nomeArq = (titulo && titulo.value) ? titulo.value : "Obra_LF_Productions";
+        
+        // Certifique-se de que a biblioteca html2pdf.js está incluída no seu HTML
+        if (typeof html2pdf !== 'undefined') {
+            html2pdf().set({
+                margin: 15,
+                filename: `${nomeArq.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(folha).save();
+        } else {
+            alert("Biblioteca html2pdf não encontrada. Adicione o script no seu HTML.");
+        }
     };
 });
