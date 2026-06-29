@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================
-    // 5. QUESTIONS IA 
+  // ==========================================
+    // 5. QUESTIONS IA (Cérebro Anthropic Claude)
     // ==========================================
     window.enviarMensagemIA = async function(textoForcado = null) {
         const msgUsuario = textoForcado ? textoForcado : inputIa.value.trim();
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cria o balão de carregamento
         const idAguarde = "sys-" + Date.now();
-        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Questions IA está processando sua solicitação...</div>`;
+        chatBox.innerHTML += `<div class="mensagem ia" id="${idAguarde}">Questions IA está processando via Anthropic...</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
         // Coleta o contexto
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tituloTexto = titulo ? titulo.value : 'Desconhecido';
         
         const promptSistema = `Você é a "Questions IA", a inteligência artificial oficial de auxílio literário da empresa L.F Productions.
-        REGRA MÁXIMA: Se perguntarem sua identidade, responda estritamente que você é a Questions IA.
+        REGRA MÁXIMA: Se perguntarem sua identidade, responda estritamente que você é a Questions IA designada à L.F Productions. Jamais mencione Anthropic, OpenAI ou Google.
         
         Dados da Obra:
         - Título: ${tituloTexto}
@@ -102,16 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
         try {
-            const response = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+            // Mudança para o endpoint correto da Anthropic usando o proxy/cors padrão para testes front-end
+            const response = await fetch(`https://api.anthropic.com/v1/messages`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
+                    'x-api-key': API_KEY,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerously-allow-browser': 'true' // Permite rodar direto no navegador para seu teste
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192", 
+                    model: "claude-3-5-sonnet-20241022", // Modelo ultra inteligente para literatura
+                    max_tokens: 1024,
+                    system: promptSistema,
                     messages: [
-                        { role: "system", content: promptSistema },
                         { role: "user", content: msgUsuario }
                     ],
                     temperature: 0.7
@@ -124,24 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
             }
             
-            const textoFinal = data.choices[0].message.content;
+            // A Anthropic retorna a resposta dentro de um array 'content'
+            const textoFinal = data.content[0].text;
             document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
 
         } catch (error) {
-            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Falha na conexão. Verifique sua chave API ou internet. Detalhe: ${error.message}</span>`;
+            document.getElementById(idAguarde).innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Falha na conexão. Detalhe: ${error.message}</span>`;
             console.error("Detalhes do erro:", error);
         }
         chatBox.scrollTop = chatBox.scrollHeight;
     };
-
-    window.acaoIA = function(texto) {
-        enviarMensagemIA(texto);
-    };
-
-    window.verificarEnter = function(e) {
-        if(e.key === 'Enter') enviarMensagemIA();
-    };
-
     // ==========================================
     // 6. AJUSTES DO ESTÚDIO E SIMULADOR
     // ==========================================
