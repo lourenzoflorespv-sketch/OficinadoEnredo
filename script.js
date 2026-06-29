@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. CONFIGURAÇÃO DA API 
     // ==========================================
     // Cole sua NOVA chave aqui entre as aspas:
-    const API_KEY = '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'; 
+    const API_KEY = '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'; 
 
     const corpo = document.body;
     let luzLigada = false;
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-  // ==========================================
+// ==========================================
     // 5. QUESTIONS IA (Cérebro Anthropic Claude)
     // ==========================================
     window.enviarMensagemIA = async function(textoForcado = null) {
@@ -102,17 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
         try {
-            // Mudança para o endpoint correto da Anthropic usando o proxy/cors padrão para testes front-end
             const response = await fetch(`https://api.anthropic.com/v1/messages`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'x-api-key': API_KEY,
                     'anthropic-version': '2023-06-01',
-                    'anthropic-dangerously-allow-browser': 'true' // Permite rodar direto no navegador para seu teste
+                    // Cabeçalho oficial necessário para rodar direto do navegador (front-end)
+                    'anthropic-dangerous-direct-browser-access': 'true' 
                 },
                 body: JSON.stringify({
-                    model: "claude-3-5-sonnet-20241022", // Modelo ultra inteligente para literatura
+                    model: "claude-3-5-sonnet-20241022", 
                     max_tokens: 1024,
                     system: promptSistema,
                     messages: [
@@ -128,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
             }
             
-            // A Anthropic retorna a resposta dentro de um array 'content'
             const textoFinal = data.content[0].text;
             document.getElementById(idAguarde).innerHTML = textoFinal.replace(/\n/g, '<br>');
 
