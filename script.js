@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================
+   // ==========================================
     // 5. QUESTIONS IA (Cérebro Anthropic Claude com Proxy)
     // ==========================================
     window.enviarMensagemIA = async function(textoForcado = null) {
@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Forneça uma resposta técnica, inspiradora e profissional para ajudar o escritor. Mantenha a resposta concisa (2 a 3 parágrafos curtos).`;
 
         try {
-            // Utiliza o proxy cors-anywhere para garantir que o navegador não bloqueie a requisição
             const urlProxy = 'https://cors-anywhere.herokuapp.com/';
             const urlAnthropic = 'https://api.anthropic.com/v1/messages';
 
@@ -135,11 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const elementoDestino = document.getElementById(idAguarde);
             
             if (!response.ok) {
-                // Se o proxy exigir ativação temporária
                 if(response.status === 403) {
-                    throw new Error("Por favor, acesse primeiro https://cors-anywhere.herokuapp.com/corsdemo e clique no botão para ativar o acesso temporário de testes.");
+                    throw new Error("A requisição foi bloqueada pelo Proxy CORS. Você precisa ativar o acesso temporário em: https://cors-anywhere.herokuapp.com/corsdemo");
                 }
-                throw new Error(data.error ? data.error.message : `Erro HTTP: ${response.status}`);
+                if(response.status === 401) {
+                    throw new Error("A chave de API fornecida é inválida, expirou ou foi revogada pelo provedor de segurança.");
+                }
+                throw new Error(data.error ? data.error.message : `Erro HTTP ${response.status}`);
             }
             
             if(elementoDestino && data.content && data.content[0]) {
@@ -150,22 +151,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             const elementoDestino = document.getElementById(idAguarde);
             if(elementoDestino) {
-                elementoDestino.innerHTML = `<strong>Diagnóstico Questions IA:</strong> <span style="color:#e74c3c;">Erro. Detalhe: ${error.message}</span>`;
+                // Mensagem personalizada detalhando o motivo específico da falha
+                elementoDestino.innerHTML = `
+                    <div style="padding: 5px 0;">
+                        <strong>⚠️ Diagnóstico Temporário (Questions IA):</strong><br>
+                        <span style="color:#e74c3c; font-size: 0.85rem;">
+                            Não foi possível carregar a resposta devido a um problema técnico específico.<br>
+                            <strong>Causa provável:</strong> ${error.message}
+                        </span>
+                    </div>`;
             }
-            console.error("Detalhes do erro:", error);
+            console.error("Detalhes técnicos do erro:", error);
         }
         
         if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     };
-
-    window.acaoIA = function(texto) {
-        enviarMensagemIA(texto);
-    };
-
-    window.verificarEnter = function(e) {
-        if(e.key === 'Enter') enviarMensagemIA();
-    };
-
     // ==========================================
     // 6. AJUSTES DO ESTÚDIO E SIMULADOR
     // ==========================================
